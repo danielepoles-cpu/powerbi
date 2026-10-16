@@ -1,0 +1,1613 @@
+table Misure
+	lineageTag: afac22db-1414-405a-9f4f-66974c43f611
+
+	measure 'Vendor Count' = DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[ORIGINATOR])
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 45eb4adb-37d0-4426-bb7d-28c1e95d2360
+
+	measure 'Document Count' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			    'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE
+			)
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 6fe41ea0-003f-4b01-b507-f1d790a939ba
+
+	measure 'Actual Docs' =
+			CALCULATE(
+			    DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST]= TRUE,
+			    NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) ||
+			    NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) ||
+			    NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) ||
+			    NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			)
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 02178b3d-a7e4-46dd-8216-20e1d8b7febc
+
+	measure 'Actual Key Docs' =
+			CALCULATE(
+			    DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			    'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST]= TRUE,
+			    (
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			    )
+			)
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 383e6ccf-76d0-4267-bad5-34f9ecc0ed3f
+
+	measure 'Actual Other Docs' = ```
+			CALCULATE(
+			    DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST]= TRUE,
+			    'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] <> "Yes" || 
+			    ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS]),
+			    (
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) ||
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 02147eb8-aa38-44e3-8a48-40a416599f82
+
+	measure 'Total N° Revision' = COUNT('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 1b28c242-5de6-4b81-ab5f-db6feac67f47
+
+	measure 'Actual Docs Avg. Revision' =
+			
+			DIVIDE(
+			    [Total N° Revision],
+			    [Actual Docs],
+			    0
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 4cb7e808-a2b3-4df7-b97d-198a09a784f6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Actual Key Docs Avg. Revision' =
+			
+			DIVIDE(
+			    [Total N° Revision],
+			    [Actual Key Docs],
+			    0
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 168d504b-f4ea-4552-aaea-b4c764678c4c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Actual Other Docs Avg. Revision' =
+			
+			DIVIDE(
+			    [Total N° Revision],
+			    [Actual Other Docs],
+			    0
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 5eb9cc3d-23ff-499e-9a06-6dbb586b0b5c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Planned Events' = ```
+			
+			VAR LastRefreshDate = MAX(LastRefresh[LastRefresh])
+			VAR SelectedPhase = SELECTEDVALUE('DIM_Events'[Events], "Submission")
+			
+			RETURN 
+			SWITCH(
+			    SelectedPhase,
+			    "Issue", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE])
+			        ),
+			    "Return", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE])
+			        ),
+			    -- Default / Submission:
+			    CALCULATE(
+			        COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			        'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE] <= LastRefreshDate,
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 6356ca7c-0724-4046-8e92-43fed72f380e
+
+	measure 'Planned Key Events' = ```
+			
+			VAR LastRefreshDate = MAX(LastRefresh[LastRefresh])
+			VAR SelectedPhase = SELECTEDVALUE('DIM_Events'[Events], "Submission")
+			
+			RETURN 
+			SWITCH(
+			    SelectedPhase,
+			    "Issue", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE])
+			        ),
+			    "Return", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE])
+			        ),
+			    -- Default / Submission:
+			    CALCULATE(
+			        COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			        'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			        'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE] <= LastRefreshDate,
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: dd6de1fc-5a18-43ae-8724-6919094ecb39
+
+	measure 'Planned Other Events' = ```
+			
+			VAR LastRefreshDate = MAX(LastRefresh[LastRefresh])
+			VAR SelectedPhase = SELECTEDVALUE('DIM_Events'[Events], "Submission")
+			
+			RETURN 
+			SWITCH(
+			    SelectedPhase,
+			    "Issue", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] <> "Yes" 
+			                || ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS]),
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE])
+			        ),
+			    "Return", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] <> "Yes" 
+			                || ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS]),
+			            'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE])
+			        ),
+			    -- Default / Submission:
+			    CALCULATE(
+			        COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			        'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] <> "Yes" 
+			            || ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS]),
+			        'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE] <= LastRefreshDate,
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 24cc9aa2-c564-4da2-85a5-146bc403b7ec
+
+	measure 'Actual Events' = ```
+			
+			VAR LastRefreshDate = MAX(LastRefresh[LastRefresh])
+			VAR SelectedPhase   = SELECTEDVALUE('DIM_Events'[Events], "Submission")
+			
+			RETURN 
+			SWITCH(
+			    SelectedPhase,
+			    "Issue", 
+			        CALCULATE(
+			            COUNT('pbi F_DWH_REFERENCE_VENDORS'[REASON_FOR_ISSUE]),
+			            'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])
+			        ),
+			    "Return", 
+			        CALCULATE(
+			            COUNT('pbi F_DWH_REFERENCE_VENDORS'[REASON_FOR_ISSUE]),
+			            'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])
+			        ),
+			    -- Default / Submission:
+			    CALCULATE(
+			        COUNT('pbi F_DWH_REFERENCE_VENDORS'[REASON_FOR_ISSUE]),
+			        'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE] <= LastRefreshDate,
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: b0c5be57-5a00-430e-a5d4-36a278244910
+
+	measure 'Actual Key Events' = ```
+			
+			VAR LastRefreshDate = MAX(LastRefresh[LastRefresh])
+			VAR SelectedPhase = SELECTEDVALUE('DIM_Events'[Events], "Submission")
+			
+			RETURN 
+			SWITCH(
+			    SelectedPhase,
+			    "Issue", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			            'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])
+			        ),
+			    "Return", 
+			        CALCULATE(
+			            COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			            'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			            'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE] <= LastRefreshDate,
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])
+			        ),
+			    -- Default / Submission:
+			    CALCULATE(
+			        COUNTROWS('pbi F_DWH_REFERENCE_VENDORS'),
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE,
+			        'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes",
+			        'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE] <= LastRefreshDate,
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			    )
+			)
+			```
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 8e1f18a1-009b-4861-a181-15f22171478f
+
+	measure 'Actual Other Events' = [Actual Events] - [Actual Key Events]
+		formatString: 0
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: f1933258-c29f-45f4-a223-5bf7992efb64
+
+	measure 'Delay vs BL (Submission)' =
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    -- PENDING: In corso (senza Actual Submission)
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE], LastRefresh, DAY)
+			    ),
+			    -- OVERALL: Tutti i documenti
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+			        ),
+			        VAR ActualDate  = 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]
+			        VAR PlannedDate = 'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE]
+			        RETURN
+			        IF(NOT ISBLANK(ActualDate), DATEDIFF(PlannedDate, ActualDate, DAY), DATEDIFF(PlannedDate, LastRefresh, DAY))
+			    )
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: 86858236-7596-4104-895d-588597aef3bf
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Delay vs BL (Issue)' =
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    -- PENDING: In corso (senza Actual Issue)
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE], LastRefresh, DAY)
+			    ),
+			    -- OVERALL: Tutti i documenti
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE])
+			        ),
+			        VAR ActualDate  = 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]
+			        VAR PlannedDate = 'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE]
+			        RETURN
+			        IF(NOT ISBLANK(ActualDate), DATEDIFF(PlannedDate, ActualDate, DAY), DATEDIFF(PlannedDate, LastRefresh, DAY))
+			    )
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: f20f4913-7bcb-4a2f-b94b-382ce921888f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Delay vs FC (Submission)' =
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    -- PENDING: In corso (senza Actual Submission)
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], LastRefresh, DAY)
+			    ),
+			    -- OVERALL: Tutti i documenti
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])
+			        ),
+			        VAR ActualDate   = 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]
+			        VAR ForecastDate = 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]
+			        RETURN
+			        IF(NOT ISBLANK(ActualDate), DATEDIFF(ForecastDate, ActualDate, DAY), DATEDIFF(ForecastDate, LastRefresh, DAY))
+			    )
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: b57e682e-2554-4560-a348-0d0978a87476
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Delay vs FC (Issue)' =
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    -- PENDING: In corso (senza Actual Issue)
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], LastRefresh, DAY)
+			    ),
+			    -- OVERALL: Tutti i documenti
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])
+			        ),
+			        VAR ActualDate   = 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]
+			        VAR ForecastDate = 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE]
+			        RETURN
+			        IF(NOT ISBLANK(ActualDate), DATEDIFF(ForecastDate, ActualDate, DAY), DATEDIFF(ForecastDate, LastRefresh, DAY))
+			    )
+			)
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: f5c7c386-fb84-47b3-b11d-41da0a5fb0f1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'CPY Delay' = ```
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    
+			    -- =========================================================================
+			    -- PENDING: Considera solo i documenti aperti presso il cliente
+			    --  - Invio al cliente effettuato (ACTUAL_ISSUE_DATE presente)
+			    --  - Risposta NON ancora ricevuta (ACTUAL_CPY_REPLY_DATE vuota)
+			    --  - Flag risposta necessaria (REPLY_NEEDED_FLAG <> "N")
+			    --  - Calcola il ritardo accumulato ad oggi (LastRefresh - PLANNED_CPY_REPLY_DATE)
+			    -- =========================================================================
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] <> "N" &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_CPY_REPLY_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_CPY_REPLY_DATE], LastRefresh, DAY)
+			    ),
+			    
+			    -- =========================================================================
+			    -- OVERALL: Considera tutti i documenti inviati al cliente (passati e presenti)
+			    --  - Se concluso (ACTUAL_CPY_REPLY_DATE presente) -> diff(Planned, Actual)
+			    --  - Se aperto (ACTUAL_CPY_REPLY_DATE vuota)     -> diff(Planned, LastRefresh)
+			    -- =========================================================================
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] <> "N" &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_CPY_REPLY_DATE])
+			        ),
+			        VAR ActualReply  = 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]
+			        VAR PlannedReply = 'pbi F_DWH_REFERENCE_VENDORS'[PLANNED_CPY_REPLY_DATE]
+			        RETURN
+			        IF(
+			            NOT ISBLANK(ActualReply),
+			            DATEDIFF(PlannedReply, ActualReply, DAY),
+			            DATEDIFF(PlannedReply, LastRefresh, DAY)
+			        )
+			    )
+			)
+			```
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: ab522920-a0d3-4037-8875-cf2f949b5b0f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Return Delay' = ```
+			
+			VAR ViewMode    = SELECTEDVALUE('DIM_ViewMode'[ViewMode], "Pending")
+			VAR LastRefresh = MAX(LastRefresh[LastRefresh])
+			
+			RETURN
+			IF(
+			    ViewMode = "Pending",
+			    
+			    -- =========================================================================
+			    -- PENDING: Considera solo i documenti in corso di revisione/return
+			    --  - Forecast Return Date presente
+			    --  - Return finale NON ancora avvenuto (ACTUAL_RETURN_DATE vuota)
+			    --  - Calcola il ritardo accumulato ad oggi (LastRefresh - FORECAST_RETURN_DATE)
+			    -- =========================================================================
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE]) &&
+			            ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])
+			        ),
+			        DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], LastRefresh, DAY)
+			    ),
+			    
+			    -- =========================================================================
+			    -- OVERALL: Considera tutti i documenti della sorgente con Forecast Return
+			    --  - Se concluso (ACTUAL_RETURN_DATE presente) -> diff(Forecast, Actual)
+			    --  - Se aperto (ACTUAL_RETURN_DATE vuota)     -> diff(Forecast, LastRefresh)
+			    -- =========================================================================
+			    AVERAGEX(
+			        FILTER(
+			            'pbi F_DWH_REFERENCE_VENDORS',
+			            'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			            NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])
+			        ),
+			        VAR ActualReturn   = 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]
+			        VAR ForecastReturn = 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE]
+			        RETURN
+			        IF(
+			            NOT ISBLANK(ActualReturn),
+			            DATEDIFF(ForecastReturn, ActualReturn, DAY),
+			            DATEDIFF(ForecastReturn, LastRefresh, DAY)
+			        )
+			    )
+			)
+			```
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: e65fd1b2-433b-4614-93e0-218133c4575c
+
+	measure 'Last Update' = FORMAT(MAX(LastRefresh[LastRefresh]), "dd/MM/yyyy")
+		displayFolder: Misure\Vendor Follow-Up
+		lineageTag: c0da4b16-ed42-46f8-b78e-9de95052e7f9
+
+	/// BBP: distinct VERSION_LABEL.
+	measure 'Version Count' = DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[VERSION_LABEL])
+		formatString: 0
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 1cef28da-1901-4f11-8e30-c873acb68e5a
+
+	/// BBP: sum of estimated hours per document (latest version). Null or 0 -> default 1 (BBP rule).
+	measure 'Estimated Hours' =
+			SUMX(
+			    VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			    VAR h = CALCULATE(MAX('pbi F_DWH_REFERENCE_VENDORS'[ESTIMATED_HOURS]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE)
+			    RETURN IF(ISBLANK(h) || h = 0, 1, h)
+			)
+		formatString: #,0.##
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 026f0c41-4b86-4c30-bed8-e8c07f759f11
+
+	/// BBP: planned progress at the update date. Per document, progress % of the RFI with the latest planned date <= today, weighted by estimated hours. Not available for event Return (RFI list has no return dates).
+	measure 'Planned %' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR Num =
+			    SUMX(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        VAR ref = 'pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]
+			        VAR h = CALCULATE(MAX('pbi F_DWH_REFERENCE_VENDORS'[ESTIMATED_HOURS]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE)
+			        VAR hh = IF(ISBLANK(h) || h = 0, 1, h)
+			        VAR pct = SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_ELENCO_RFI_VENDORS', NOT ISBLANK('pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_ISSUE_DATE]) && 'pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_ISSUE_DATE] <= T0), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_ISSUE_DATE], DESC), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PERCENTAGE]), TREATAS({ref}, 'pbi F_DWH_ELENCO_RFI_VENDORS'[REFERENCE])),
+					    "Return", BLANK(),
+					    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_ELENCO_RFI_VENDORS', NOT ISBLANK('pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_SUBMISSION_DATE]) && 'pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_SUBMISSION_DATE] <= T0), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PLANNED_SUBMISSION_DATE], DESC), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PERCENTAGE]), TREATAS({ref}, 'pbi F_DWH_ELENCO_RFI_VENDORS'[REFERENCE]))
+					)
+			        RETURN COALESCE(pct, 0) / 100 * hh
+			    )
+			RETURN DIVIDE(Num, [Estimated Hours])
+		formatString: 0%
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 41b67a66-aa5f-4c17-b3f5-fd7d0c7b053b
+
+	/// BBP: actual progress at the update date. Per document, progress % of the RFI with the latest actual date <= today, weighted by estimated hours.
+	measure 'Actual %' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR Num =
+			    SUMX(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        VAR ref = 'pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]
+			        VAR h = CALCULATE(MAX('pbi F_DWH_REFERENCE_VENDORS'[ESTIMATED_HOURS]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE)
+			        VAR hh = IF(ISBLANK(h) || h = 0, 1, h)
+			        VAR pct = SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_ELENCO_RFI_VENDORS', NOT ISBLANK('pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_ISSUE_DATE]) && 'pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_ISSUE_DATE] <= T0), 'pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_ISSUE_DATE], DESC), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PERCENTAGE]), TREATAS({ref}, 'pbi F_DWH_ELENCO_RFI_VENDORS'[REFERENCE])),
+					    "Return", BLANK(),
+					    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_ELENCO_RFI_VENDORS', NOT ISBLANK('pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_SUBMISSION_DATE]) && 'pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_SUBMISSION_DATE] <= T0), 'pbi F_DWH_ELENCO_RFI_VENDORS'[ACTUAL_SUBMISSION_DATE], DESC), 'pbi F_DWH_ELENCO_RFI_VENDORS'[PERCENTAGE]), TREATAS({ref}, 'pbi F_DWH_ELENCO_RFI_VENDORS'[REFERENCE]))
+					)
+			        RETURN COALESCE(pct, 0) / 100 * hh
+			    )
+			RETURN DIVIDE(Num, [Estimated Hours])
+		formatString: 0%
+		displayFolder: Claude BBP\1 Base
+		lineageTag: fb26d3f7-dee4-450e-ace1-cb12ddbcf064
+
+	/// BBP: Planned % x Estimated Hours.
+	measure 'Earned Hours (Planned)' = [Planned %] * [Estimated Hours]
+		formatString: #,0.##
+		displayFolder: Claude BBP\1 Base
+		lineageTag: d0d4b16e-2476-4c25-9564-167b8074d24c
+
+	/// BBP: Actual % x Estimated Hours.
+	measure 'Earned Hours (Actual)' = [Actual %] * [Estimated Hours]
+		formatString: #,0.##
+		displayFolder: Claude BBP\1 Base
+		lineageTag: de563c7d-f841-4000-a885-e9f126b4428a
+
+	/// PROXY: BBP defines open = latest version with Decision Code <> 1F/4F, but Decision Code is not yet available in the DWH. Until then a document is open while it has no Actual Return Date.
+	measure 'Open Docs' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+		formatString: 0
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 2c3f32dc-acb0-45f0-8f04-0266c65ad017
+
+	/// PROXY (see Open Docs). Key documents only.
+	measure 'Open Key Docs' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]), 'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] = "Yes")
+		formatString: 0
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 88fa1f90-bf97-46ce-b7c8-c84e9d8fa334
+
+	/// PROXY (see Open Docs). Non-key documents.
+	measure 'Open Other Docs' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]), 'pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS] <> "Yes" || ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ENGINEERING_KEY_DOCUMENTS]))
+		formatString: 0
+		displayFolder: Claude BBP\1 Base
+		lineageTag: dc7d6e2b-a7e3-4376-a1c2-70ab33534a68
+
+	/// BBP: ON GOING if at least one open document exists, FINAL otherwise (uses the Open Docs proxy).
+	measure 'Vendor Status' = IF(ISEMPTY('pbi F_DWH_REFERENCE_VENDORS'), BLANK(), IF([Open Docs] > 0, "ON GOING", "FINAL"))
+		displayFolder: Claude BBP\1 Base
+		lineageTag: 1d7c97d5-b3a7-4567-a8ec-92fa8e85c4c7
+
+	/// Conditional format helper: green row when the vendor is FINAL (BBP).
+	measure 'Status Row Color' = IF([Vendor Status] = "FINAL", "#C6E0B4", BLANK())
+		displayFolder: Claude BBP\1 Base
+		lineageTag: cdce832f-e5a4-432f-9580-d8d94ade01e8
+
+	/// Phase tracker: Actual Submission Date present.
+	measure 'Docs Submitted' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+		formatString: 0
+		displayFolder: Claude BBP\2 Phase Tracker
+		lineageTag: 8c6f1913-1de4-4a72-ba83-a1bd1c67626f
+
+	/// Phase tracker: Actual Submission present and Actual Issue empty.
+	measure 'Docs To Be Issued' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]))
+		formatString: 0
+		displayFolder: Claude BBP\2 Phase Tracker
+		lineageTag: c790e31e-b804-4998-b246-f5df1a6679ac
+
+	/// Phase tracker: Actual Issue Date present.
+	measure 'Docs Issued' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]))
+		formatString: 0
+		displayFolder: Claude BBP\2 Phase Tracker
+		lineageTag: ae80b8a5-26f8-45f8-845c-11f2e8959a53
+
+	/// Phase tracker: Actual Return empty and (Actual Issue present, or no issue foreseen: Actual Submission present and Planned Issue empty).
+	measure 'Docs To Be Returned' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]), (NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) || (NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE]))))
+		formatString: 0
+		displayFolder: Claude BBP\2 Phase Tracker
+		lineageTag: cb93b714-08fc-4ef0-8484-65577ef5884f
+
+	/// Phase tracker: Actual Return Date present.
+	measure 'Docs Returned' = CALCULATE(DISTINCTCOUNT('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]), 'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE, NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+		formatString: 0
+		displayFolder: Claude BBP\2 Phase Tracker
+		lineageTag: eca5de7b-2bfb-49f6-b2ce-e4b324c974e1
+
+	/// BBP: documents whose First RFI (min Forecast date of open RFIs, selected event) falls in the week. Forecast in the past -> current week.
+	measure 'First RFI (Periodic)' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR WkStart = T0 - WEEKDAY(T0, 2) + 1
+			VAR w = SELECTEDVALUE(DIM_Weeks[WeekNo])
+			VAR Docs = ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+					    "Return", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+					    CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+					)
+			    )
+			RETURN
+			IF(
+			    ISBLANK(w),
+			    BLANK(),
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR Bk = MAX(0, INT((d - WkStart) / 7))
+			            RETURN NOT ISBLANK(d) && Bk = w
+			        )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\3 Run-Down
+		lineageTag: 60a982f6-e209-499a-92f0-46211eda6eab
+
+	/// BBP: documents whose Last RFI (max Forecast date of open RFIs, selected event) falls in the week. Forecast in the past -> current week.
+	measure 'Last RFI (Periodic)' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR WkStart = T0 - WEEKDAY(T0, 2) + 1
+			VAR w = SELECTEDVALUE(DIM_Weeks[WeekNo])
+			VAR Docs = ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+					    "Return", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+					    CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+					)
+			    )
+			RETURN
+			IF(
+			    ISBLANK(w),
+			    BLANK(),
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR Bk = MAX(0, INT((d - WkStart) / 7))
+			            RETURN NOT ISBLANK(d) && Bk = w
+			        )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\3 Run-Down
+		lineageTag: ef6e5e85-8fea-45fc-add3-42b832842989
+
+	/// Run-down of First RFI: documents still to be issued from the week onwards (as in the BBP mock-up, decreasing curve).
+	measure 'First RFI (Run-Down)' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR WkStart = T0 - WEEKDAY(T0, 2) + 1
+			VAR w = SELECTEDVALUE(DIM_Weeks[WeekNo])
+			VAR Docs = ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+					    "Return", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+					    CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+					)
+			    )
+			RETURN
+			IF(
+			    ISBLANK(w),
+			    BLANK(),
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR Bk = MAX(0, INT((d - WkStart) / 7))
+			            RETURN NOT ISBLANK(d) && Bk >= w
+			        )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\3 Run-Down
+		lineageTag: 503ad008-dd3d-4cf0-8588-dc58d55c7f01
+
+	/// Run-down of Last RFI: documents still to be issued from the week onwards (as in the BBP mock-up, decreasing curve).
+	measure 'Last RFI (Run-Down)' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR WkStart = T0 - WEEKDAY(T0, 2) + 1
+			VAR w = SELECTEDVALUE(DIM_Weeks[WeekNo])
+			VAR Docs = ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+					    Ev,
+					    "Issue", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+					    "Return", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+					    CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+					)
+			    )
+			RETURN
+			IF(
+			    ISBLANK(w),
+			    BLANK(),
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR Bk = MAX(0, INT((d - WkStart) / 7))
+			            RETURN NOT ISBLANK(d) && Bk >= w
+			        )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\3 Run-Down
+		lineageTag: f03d067d-a89d-4737-9ca0-d3bd88f3af3d
+
+	/// BBP: planned date of the first RFI (phase-based).
+	measure 'DB Planned 1st Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MIN('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE]),
+						    "Return", MIN('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE]),
+						    MIN('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 70a8de1c-ff0d-41b5-b3b6-e497795bd59e
+
+	/// BBP: min Forecast date among the RFIs (phase-based).
+	measure 'DB Forecast 1st Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MIN('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE]),
+						    "Return", MIN('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE]),
+						    MIN('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 30a437a5-c5c3-4093-ac82-15ddc61c3629
+
+	/// BBP: first Actual date (phase-based).
+	measure 'DB Actual 1st Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MIN('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]),
+						    "Return", MIN('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]),
+						    MIN('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 8355765d-0b10-4cad-97d0-08ab341170ff
+
+	/// BBP: planned date of the last RFI (phase-based).
+	measure 'DB Planned Final Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MAX('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_ISSUE_DATE]),
+						    "Return", MAX('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_RETURN_DATE]),
+						    MAX('pbi F_DWH_REFERENCE_VENDORS'[PLANNED_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 8621a6c4-8c14-4704-88d0-fe23665eac41
+
+	/// BBP: max Forecast date among the RFIs (phase-based).
+	measure 'DB Forecast Final Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MAX('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE]),
+						    "Return", MAX('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE]),
+						    MAX('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 1593e150-5f80-4d2e-b924-91826af3a3fd
+
+	/// BBP: last Actual date (phase-based).
+	measure 'DB Actual Final Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			RETURN SWITCH(
+						    Ev,
+						    "Issue", MAX('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]),
+						    "Return", MAX('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]),
+						    MAX('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE])
+						)
+		formatString: dd/mm/yy
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 2c1cd924-8809-4b83-8538-0c3402747037
+
+	/// BBP: no Actual date on the First RFI.
+	measure 'DB Docs Missing' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR Docs =
+			    ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "FirstAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						),
+			        "LastAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						)
+			    )
+			RETURN COUNTROWS(FILTER(Docs, ISBLANK([FirstAct])))
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 4761e6f6-5633-4807-9531-0fdb9b730a52
+
+	/// BBP: Actual on the First RFI but not on the Last RFI.
+	measure 'DB Docs First Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR Docs =
+			    ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "FirstAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						),
+			        "LastAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						)
+			    )
+			RETURN COUNTROWS(FILTER(Docs, NOT ISBLANK([FirstAct]) && ISBLANK([LastAct])))
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 5e79e748-79ab-40be-95f8-5dbf3b5747c6
+
+	/// BBP: Actual on both First and Last RFI.
+	measure 'DB Docs Final Issue' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR Docs =
+			    ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "FirstAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], ASC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						),
+			        "LastAct", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+						    CALCULATE(MAXX(TOPN(1, FILTER('pbi F_DWH_REFERENCE_VENDORS', NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE], DESC), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]))
+						)
+			    )
+			RETURN COUNTROWS(FILTER(Docs, NOT ISBLANK([FirstAct]) && NOT ISBLANK([LastAct])))
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: 0cd05956-daa9-4925-9ec1-fc9c70c698eb
+
+	/// Value for the pie chart (category = DIM_DataBookStatus[Status]).
+	measure 'DB Docs by Status' =
+			SWITCH(
+			    SELECTEDVALUE(DIM_DataBookStatus[Status]),
+			    "First Issue", [DB Docs First Issue],
+			    "Final Issue", [DB Docs Final Issue],
+			    "Missing", [DB Docs Missing],
+			    BLANK()
+			)
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: ccbafd1d-5191-479b-b489-37c445ce3e29
+
+	/// BBP: documents whose First RFI (min open Forecast date) falls in the period. Past dates are assigned to the current period.
+	measure 'DB Forecast 1st Issue Count' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR pS = MIN(DIM_Calendar[Date])
+			VAR pE = MAX(DIM_Calendar[Date])
+			VAR Docs =
+			    ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+						    "Return", CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+						    CALCULATE(MINX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+						)
+			    )
+			VAR c =
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR dd = IF(d < T0, T0, d)
+			            RETURN NOT ISBLANK(d) && dd >= pS && dd <= pE
+			        )
+			    )
+			RETURN IF(c = 0, BLANK(), c)
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: e295ba6c-e4fd-4650-be1a-516f4d1761e4
+
+	/// BBP: documents whose Last RFI (max open Forecast date) falls in the period. Past dates are assigned to the current period.
+	measure 'DB Forecast Final Issue Count' =
+			VAR Ev = SELECTEDVALUE(DIM_Events[Events], "Submission")
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			VAR pS = MIN(DIM_Calendar[Date])
+			VAR pE = MAX(DIM_Calendar[Date])
+			VAR Docs =
+			    ADDCOLUMNS(
+			        VALUES('pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+			        "DocDate", SWITCH(
+						    Ev,
+						    "Issue", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_ISSUE_DATE])),
+						    "Return", CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_RETURN_DATE])),
+						    CALCULATE(MAXX(FILTER('pbi F_DWH_REFERENCE_VENDORS', ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) && NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE])), 'pbi F_DWH_REFERENCE_VENDORS'[FORECAST_SUBMISSION_DATE]))
+						)
+			    )
+			VAR c =
+			    COUNTROWS(
+			        FILTER(
+			            Docs,
+			            VAR d = [DocDate]
+			            VAR dd = IF(d < T0, T0, d)
+			            RETURN NOT ISBLANK(d) && dd >= pS && dd <= pE
+			        )
+			    )
+			RETURN IF(c = 0, BLANK(), c)
+		formatString: 0
+		displayFolder: Claude BBP\4 Final Data Book
+		lineageTag: a0c3fe0e-574e-44ea-8b23-18aaf47d0833
+
+	/// BBP: average target days for DC Acknowledge (TAP table).
+	measure 'WF DC Acknowledge Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ACK_TARGET]))
+			    ),
+			    RELATED('pbi PAR_WP'[TBD_ACK_TARGET])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: f7a80ed2-ae17-4a8f-a380-cda5ee8e77c7
+
+	/// BBP: average actual days for DC Acknowledge (actual - previous milestone).
+	measure 'WF DC Acknowledge Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ACK_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 34e6d7f3-22bf-45c9-a13c-13175355f618
+
+	/// BBP: documents waiting for DC Acknowledge. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF DC Acknowledge Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ACK_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 2e68b547-b5d3-4058-a116-6b5502040a31
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF DC Acknowledge Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ACK_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE] + RELATED('pbi PAR_WP'[TBD_ACK_TARGET]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 0381e4d7-b92a-428e-bee3-abfa3d572992
+
+	/// BBP: completed documents per delay bucket for DC Acknowledge (category = DIM_DelayBucket[Bucket]).
+	measure 'WF DC Acknowledge Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ACK_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE])),
+			        VAR dl = DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_SUBMISSION_DATE] + RELATED('pbi PAR_WP'[TBD_ACK_TARGET]), 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 1564436e-8758-4cfd-b9ae-8157978a75a2
+
+	/// BBP: average target days for DC Formal Review Start (TAP table).
+	measure 'WF DC Formal Review Start Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]))
+			    ),
+			    RELATED('pbi PAR_WP'[TBD_FR_START_TARGET])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: de29f331-aad4-47ad-96db-824fc1b6774e
+
+	/// BBP: average actual days for DC Formal Review Start (actual - previous milestone).
+	measure 'WF DC Formal Review Start Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 14fe8aec-2f34-43fd-b9dc-7087b802308f
+
+	/// BBP: documents waiting for DC Formal Review Start. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF DC Formal Review Start Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 371da9ae-36e9-4af6-8688-ebfa78392249
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF DC Formal Review Start Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE] + RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 47d2b01f-f185-4b6f-a533-0e16844ee9a0
+
+	/// BBP: completed documents per delay bucket for DC Formal Review Start (category = DIM_DelayBucket[Bucket]).
+	measure 'WF DC Formal Review Start Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE])),
+			        VAR dl = DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE] + RELATED('pbi PAR_WP'[TBD_FR_START_TARGET]), 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 2ce80134-3eac-4fd2-bfaf-1f985a14286c
+
+	/// BBP: average target days for PSL Formal Review End (TAP table).
+	measure 'WF PSL Formal Review End Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]))
+			    ),
+			    RELATED('pbi PAR_WP'[FORMALREVIEW_TAP])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: bdc5f188-97bd-4856-8aad-0621d5a7d863
+
+	/// BBP: average actual days for PSL Formal Review End (actual - previous milestone).
+	measure 'WF PSL Formal Review End Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: a254e919-b177-4cca-947c-cb3fb6a0f199
+
+	/// BBP: documents waiting for PSL Formal Review End. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF PSL Formal Review End Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: fde9c303-8155-4a35-9340-5d237461fdc6
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF PSL Formal Review End Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE] + RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: e0232e18-9ca2-48d8-b1d7-081ecc033fea
+
+	/// BBP: completed documents per delay bucket for PSL Formal Review End (category = DIM_DelayBucket[Bucket]).
+	measure 'WF PSL Formal Review End Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        'pbi F_DWH_REFERENCE_VENDORS'[TBD_REVIEW_NEEDED] <> "N" &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])),
+			        VAR dl = DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_FR_START_DATE] + RELATED('pbi PAR_WP'[FORMALREVIEW_TAP]), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 0e5512b2-9dfa-4330-8d4d-bab5a6eaf6a2
+
+	/// BBP: average target days for DC Issue to CPY (TAP table).
+	measure 'WF DC Issue to CPY Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]))
+			    ),
+			    RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 61314fd8-e632-4945-8872-c5951a171a33
+
+	/// BBP: average actual days for DC Issue to CPY (actual - previous milestone).
+	measure 'WF DC Issue to CPY Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+			    DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: de1777c6-964e-40a5-b3f3-093d5a99e109
+
+	/// BBP: documents waiting for DC Issue to CPY. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF DC Issue to CPY Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 55a91433-1c58-4117-850b-a5e6361435ac
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF DC Issue to CPY Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) + RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 309eefcf-2d5c-4160-9418-8475c1ee60e1
+
+	/// BBP: completed documents per delay bucket for DC Issue to CPY (category = DIM_DelayBucket[Bucket]).
+	measure 'WF DC Issue to CPY Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE])),
+			        VAR dl = DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[TBD_ACTUAL_ACK_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE]) + RELATED('pbi PAR_WP'[TBD_ISSUE_TARGET]), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 7cc68ba0-ae8f-4cca-80f4-058ede22ca99
+
+	/// BBP: average target days for CPY Reply (TAP table).
+	measure 'WF CPY Reply Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        NOT ('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] IN {"NO", "N", "NA - Not Applicable"}) &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[CUSTOMER_TAP]))
+			    ),
+			    RELATED('pbi PAR_WP'[CUSTOMER_TAP])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 187562f7-320d-4201-8162-7be106f17e82
+
+	/// BBP: average actual days for CPY Reply (actual - previous milestone).
+	measure 'WF CPY Reply Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        NOT ('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] IN {"NO", "N", "NA - Not Applicable"}) &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[CUSTOMER_TAP]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: d6458333-16ea-40ea-b56e-3eb4c76f6a45
+
+	/// BBP: documents waiting for CPY Reply. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF CPY Reply Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        NOT ('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] IN {"NO", "N", "NA - Not Applicable"}) &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[CUSTOMER_TAP]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 74f2cbdd-4e38-4a10-930d-e5f6270caafa
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF CPY Reply Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        NOT ('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] IN {"NO", "N", "NA - Not Applicable"}) &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[CUSTOMER_TAP]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE] + RELATED('pbi PAR_WP'[CUSTOMER_TAP]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: ef949eb2-12e1-419f-a62c-095618babe33
+
+	/// BBP: completed documents per delay bucket for CPY Reply (category = DIM_DelayBucket[Bucket]).
+	measure 'WF CPY Reply Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        NOT ('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_REPLY_REQUIRED] IN {"NO", "N", "NA - Not Applicable"}) &&
+			        NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE]) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[CUSTOMER_TAP]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])),
+			        VAR dl = DATEDIFF('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_ISSUE_DATE] + RELATED('pbi PAR_WP'[CUSTOMER_TAP]), 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: d56686eb-51d4-4a0f-8282-0634cf2008c2
+
+	/// BBP: average target days for DC Return (TAP table).
+	measure 'WF DC Return Target Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]))
+			    ),
+			    RELATED('pbi PAR_WP'[TBD_RETURN_TARGET])
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 6021417a-6ad0-4ff9-b976-51b36f1b3fc2
+
+	/// BBP: average actual days for DC Return (actual - previous milestone).
+	measure 'WF DC Return Actual Time Frame (av.)' =
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE], DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 8852c74e-ecc9-48b5-9625-984c0ce92967
+
+	/// BBP: documents waiting for DC Return. Documents with an Actual Return Date are excluded (phase executed but date unknown).
+	measure 'WF DC Return Pending' =
+			COUNTROWS(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]))
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 4572f5fc-b421-4ee1-aac6-3dbf11b1eb61
+
+	/// BBP: average delay of pending documents: today - (previous milestone + target).
+	measure 'WF DC Return Pending Delay (av.)' =
+			VAR T0 = INT(MAX(LastRefresh[LastRefresh]))
+			RETURN
+			AVERAGEX(
+			    FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]))
+			    ), ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE]) && ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			    DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]) + RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]), T0, DAY)
+			)
+		formatString: 0.0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 11223764-3a29-4059-9fd7-f4b66b31bcfb
+
+	/// BBP: completed documents per delay bucket for DC Return (category = DIM_DelayBucket[Bucket]).
+	measure 'WF DC Return Delay Docs' =
+			VAR b = SELECTEDVALUE(DIM_DelayBucket[Bucket])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        FILTER(FILTER(
+			        'pbi F_DWH_REFERENCE_VENDORS',
+			        'pbi F_DWH_REFERENCE_VENDORS'[IS_LATEST] = TRUE &&
+			        TRUE() &&
+			        NOT ISBLANK(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE])) &&
+			        NOT ISBLANK(RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]))
+			    ), NOT ISBLANK('pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE])),
+			        VAR dl = DATEDIFF(IF('pbi F_DWH_REFERENCE_VENDORS'[TBD_WF_FLAG] = "P", 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_REVIEW_DATE], 'pbi F_DWH_REFERENCE_VENDORS'[CLIENT_RESPONSE_DATE]) + RELATED('pbi PAR_WP'[TBD_RETURN_TARGET]), 'pbi F_DWH_REFERENCE_VENDORS'[ACTUAL_RETURN_DATE], DAY)
+			        RETURN
+			            SWITCH(
+			                TRUE(),
+			                b = "On time", dl <= 0,
+			                b = "Delay 0-7 dd", dl > 0 && dl <= 7,
+			                b = "Delay 8-14 dd", dl > 7 && dl <= 14,
+			                b = "Delay > 14 dd", dl > 14,
+			                FALSE()
+			            )
+			    )
+			)
+		formatString: 0
+		displayFolder: Claude BBP\5 Workflow
+		lineageTag: 2403d1be-c554-4efb-9e7b-2749cf118260
+
+	column Column
+		isHidden
+		formatString: 0
+		lineageTag: c8eb0b88-5b8a-4dba-b42e-167b5a2ccada
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = User
+
+	partition Misure = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = a59aad87df464461ac81a138c828e52b
+
+	annotation 436ba87b-9c83-4389-a31b-ebd06a36be98 = {"Expression":""}
+

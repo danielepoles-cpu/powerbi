@@ -1,0 +1,165 @@
+table 'pbi F_DWH_ELENCO_RFI_VENDORS'
+	lineageTag: 29188d6d-bc79-401f-9934-f05e558c4751
+
+	column WORKSPACE_ID
+		dataType: string
+		lineageTag: 827950e9-792d-420c-94eb-4ef07e15e094
+		summarizeBy: none
+		sourceColumn: WORKSPACE_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CATEGORY_ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 392942e6-08ca-4891-a9ae-3d8dc7fa4972
+		summarizeBy: count
+		sourceColumn: CATEGORY_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column REFERENCE
+		dataType: string
+		lineageTag: 4346b65c-0637-4100-952e-c9ec5674402a
+		summarizeBy: none
+		sourceColumn: REFERENCE
+
+		annotation SummarizationSetBy = Automatic
+
+	column DOCUMENT_TYPE
+		dataType: string
+		lineageTag: 109ecc49-3b6f-4548-848c-c804570136d3
+		summarizeBy: none
+		sourceColumn: DOCUMENT_TYPE
+
+		annotation SummarizationSetBy = Automatic
+
+	column REASON_FOR_ISSUE
+		dataType: string
+		lineageTag: d30f03a4-353c-4b5a-95de-6f4d3387d4bf
+		summarizeBy: none
+		sourceColumn: REASON_FOR_ISSUE
+
+		annotation SummarizationSetBy = Automatic
+
+	column row
+		dataType: int64
+		formatString: 0
+		lineageTag: 5eb2a64e-fbe6-403a-88c2-ee433a7e4469
+		summarizeBy: sum
+		sourceColumn: row
+
+		annotation SummarizationSetBy = Automatic
+
+	column PERCENTAGE
+		dataType: int64
+		formatString: 0
+		lineageTag: 9d465425-0c24-41a2-868e-84ee21e8f798
+		summarizeBy: sum
+		sourceColumn: PERCENTAGE
+
+		annotation SummarizationSetBy = Automatic
+
+	column PERCENTAGE_ISSUE
+		dataType: int64
+		formatString: 0
+		lineageTag: 576d57a1-0ca8-45e4-9af2-d152022adaa5
+		summarizeBy: sum
+		sourceColumn: PERCENTAGE_ISSUE
+
+		annotation SummarizationSetBy = Automatic
+
+	column PERCENTAGE_ORIG
+		dataType: int64
+		formatString: 0
+		lineageTag: d575d3de-9a7e-4bf8-b0c6-ebf6a840f8e7
+		summarizeBy: sum
+		sourceColumn: PERCENTAGE_ORIG
+
+		annotation SummarizationSetBy = Automatic
+
+	column ACTUAL_ISSUE_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5d3d6f6d-304a-49b7-ae5c-43c234eaaf95
+		summarizeBy: none
+		sourceColumn: ACTUAL_ISSUE_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column FORECAST_ISSUE_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3c61c3db-edcf-498d-8a95-5e48e4bb071e
+		summarizeBy: none
+		sourceColumn: FORECAST_ISSUE_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column PLANNED_ISSUE_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 80993044-d95a-441e-b6e0-9f27acc75b9e
+		summarizeBy: none
+		sourceColumn: PLANNED_ISSUE_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ACTUAL_SUBMISSION_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: df97764d-58f8-43f4-8112-e01473c3d48c
+		summarizeBy: none
+		sourceColumn: ACTUAL_SUBMISSION_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column FORECAST_SUBMISSION_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9317495e-e645-46c8-9fbe-614f5d75e8cc
+		summarizeBy: none
+		sourceColumn: FORECAST_SUBMISSION_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column PLANNED_SUBMISSION_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3e280a51-9c3a-4b68-a209-6cfb3e061d40
+		summarizeBy: none
+		sourceColumn: PLANNED_SUBMISSION_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column WORKSPACE_DESC
+		dataType: string
+		lineageTag: 5fd18ed4-d08e-47ea-90a3-1be6bc6e1087
+		summarizeBy: none
+		sourceColumn: WORKSPACE_DESC
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'pbi F_DWH_ELENCO_RFI_VENDORS' = m
+		mode: import
+		source =
+				let
+				  Origine = Sql.Database("MSSQLDB05\FusionLive", "IDOX_WS_FL"),
+				  #"Navigazione 1" = Origine{[Schema = "pbi", Item = "F_DWH_ELENCO_RFI_VENDORS"]}[Data]
+				in
+				  #"Navigazione 1"
+
+	annotation PBI_ResultType = Table
+

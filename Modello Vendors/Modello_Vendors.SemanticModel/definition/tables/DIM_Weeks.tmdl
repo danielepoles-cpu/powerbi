@@ -1,0 +1,34 @@
+table DIM_Weeks
+	lineageTag: 943bf4cf-d525-44b7-bafe-b374dd14f3e7
+
+	column WeekNo
+		dataType: int64
+		formatString: 0
+		lineageTag: 011e41af-99ee-477e-aa12-d22ee744dae4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [WeekNo]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: string
+		lineageTag: 50e2724d-f9a3-4381-8bd1-bd254120d7af
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week]
+		sortByColumn: WeekNo
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_Weeks = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS(
+				    GENERATESERIES(0, 10, 1),
+				    "WeekNo", [Value],
+				    "Week", IF([Value] = 0, "Today", "W" & [Value])
+				)
+
+	annotation PBI_Id = 3d78ad1f4b8c4e1aa51b9351eeaeb20f
+

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "dc48f6850d1b276f24a9",
+  "position": {
+    "x": 1159.7315436241611,
+    "y": 55.22531160115053,
+    "z": 1,
+    "height": 108.60977948226271,
+    "width": 375.53211888782363
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+                    }
+                  },
+                  "Property": "WORKSPACE_ID"
+                }
+              },
+              "queryRef": "pbi F_DWH_REFERENCE_VENDORS.WORKSPACE_ID",
+              "nativeQueryRef": "WORKSPACE_ID",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+                  }
+                },
+                "Property": "WORKSPACE_ID"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Basic'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "p",
+                    "Entity": "pbi F_DWH_REFERENCE_VENDORS",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "p"
+                                }
+                              },
+                              "Property": "WORKSPACE_ID"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'17806'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "4ed8e04fa2bdf1e0a9a7",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+              }
+            },
+            "Property": "WORKSPACE_ID"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

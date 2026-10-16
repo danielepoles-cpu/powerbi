@@ -1,0 +1,224 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "35841c0084bff8824a7e",
+  "position": {
+    "x": 120.00000000000001,
+    "y": 55.714285714285715,
+    "z": 0,
+    "height": 108.57142857142858,
+    "width": 1015.7142857142858,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Vendor Count"
+                }
+              },
+              "queryRef": "Misure.Count Vendor",
+              "nativeQueryRef": "Vendor Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Document Count"
+                }
+              },
+              "queryRef": "Misure.Conteggio Documenti",
+              "nativeQueryRef": "Document Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Actual Key Docs"
+                }
+              },
+              "queryRef": "Misure.Actual Key Docs",
+              "nativeQueryRef": "Actual Key Docs"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Actual Other Docs"
+                }
+              },
+              "queryRef": "Misure.Actual Other Docs",
+              "nativeQueryRef": "Actual Other Docs"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Actual Docs"
+                }
+              },
+              "queryRef": "Misure.Actual Docs",
+              "nativeQueryRef": "Actual Docs"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Total N° Revision"
+                }
+              },
+              "queryRef": "Misure.Total N° Revision",
+              "nativeQueryRef": "Total N° Revision"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Actual Docs Avg. Revision"
+                }
+              },
+              "queryRef": "Misure.Actual Docs Avg. Revision",
+              "nativeQueryRef": "Actual Docs Avg. Revision"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "7af4b60755b5aef46bb0",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Vendor Count"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "78a19fdb03f6ba930a3a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Document Count"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "c9e4c3c541034e6b219d",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Actual Key Docs"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "ad67089dc2b6225188c6",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Actual Other Docs"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "393e1afb5fb6776d0cae",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Actual Docs"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "42187dc78a7384a0b65d",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Total N° Revision"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "32905626db09302626e2",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Actual Docs Avg. Revision"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

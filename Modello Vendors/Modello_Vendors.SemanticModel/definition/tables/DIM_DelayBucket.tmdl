@@ -1,0 +1,29 @@
+table DIM_DelayBucket
+	lineageTag: 7fb8a58b-bb0a-4732-81e5-4db07ad55ff0
+
+	column Bucket
+		dataType: string
+		lineageTag: 54dbe4ca-09ec-4d0f-94ea-16084be36bab
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Bucket]
+		sortByColumn: Order
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order
+		dataType: int64
+		formatString: 0
+		lineageTag: a69c2ccd-b7a5-4a0c-864f-51155c9e8992
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_DelayBucket = calculated
+		mode: import
+		source = DATATABLE("Bucket", STRING, "Order", INTEGER, {{"On time", 1}, {"Delay 0-7 dd", 2}, {"Delay 8-14 dd", 3}, {"Delay > 14 dd", 4}})
+
+	annotation PBI_Id = 003d3980825242b5af7f6a53399a7d7e
+

@@ -1,0 +1,185 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "b9a195304f429d445667",
+  "position": {
+    "x": 171.19846596356663,
+    "y": 300.05752636625118,
+    "z": 3,
+    "height": 150.94918504314478,
+    "width": 1406.4046021093002,
+    "tabOrder": 1002
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+                    }
+                  },
+                  "Property": "REFERENCE_NAME"
+                }
+              },
+              "queryRef": "pbi F_DWH_REFERENCE_VENDORS.REFERENCE_NAME",
+              "nativeQueryRef": "REFERENCE_NAME"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+                    }
+                  },
+                  "Property": "REASON_FOR_ISSUE"
+                }
+              },
+              "queryRef": "pbi F_DWH_REFERENCE_VENDORS.REASON_FOR_ISSUE",
+              "nativeQueryRef": "REASON_FOR_ISSUE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Planned Events"
+                }
+              },
+              "queryRef": "Misure.Planned Events",
+              "nativeQueryRef": "Planned Events"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Planned Key Events"
+                }
+              },
+              "queryRef": "Misure.Planned Key Events",
+              "nativeQueryRef": "Planned Key Events"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Misure"
+                    }
+                  },
+                  "Property": "Planned Other Events"
+                }
+              },
+              "queryRef": "Misure.Planned Other Events",
+              "nativeQueryRef": "Planned Other Events"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Misure"
+                  }
+                },
+                "Property": "Planned Events"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "74952d8c643205758ab8",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+              }
+            },
+            "Property": "REFERENCE_NAME"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "cc10a090898bfd75368a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "pbi F_DWH_REFERENCE_VENDORS"
+              }
+            },
+            "Property": "REASON_FOR_ISSUE"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "68bd8d38b94cc2c46f61",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Planned Events"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "2b1edd6ad122f2c9dc14",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Planned Key Events"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "5184675f338679aedf73",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Misure"
+              }
+            },
+            "Property": "Planned Other Events"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}
