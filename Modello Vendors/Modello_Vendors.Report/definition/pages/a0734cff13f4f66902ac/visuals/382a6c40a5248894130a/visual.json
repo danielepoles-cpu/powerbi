@@ -1,0 +1,77 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "382a6c40a5248894130a",
+  "position": {
+    "x": 1369.5877277085331,
+    "y": 55.22531160115053,
+    "z": 2,
+    "height": 150,
+    "width": 374,
+    "tabOrder": 1001
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DIM_Events"
+                    }
+                  },
+                  "Property": "Events"
+                }
+              },
+              "queryRef": "DIM_Events.Events",
+              "nativeQueryRef": "Events",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Basic'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {}
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "bda695c641ecf9c92d83",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DIM_Events"
+              }
+            },
+            "Property": "Events"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

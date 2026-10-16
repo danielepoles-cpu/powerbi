@@ -1,0 +1,24 @@
+table DIM_Document
+	lineageTag: 5b0c1f3e-7d44-4a52-9c1a-2e6f0a8d3b71
+
+	column REFERENCE
+		dataType: string
+		lineageTag: c3a9e2d4-1f68-4b0e-8a57-6d2b9f4e1c03
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [REFERENCE]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_Document = calculated
+		mode: import
+		source =
+				DISTINCT(
+				    UNION(
+				        SELECTCOLUMNS('pbi F_DWH_REFERENCE_VENDORS', "REFERENCE", 'pbi F_DWH_REFERENCE_VENDORS'[REFERENCE_NAME]),
+				        SELECTCOLUMNS('pbi F_DWH_ELENCO_RFI_VENDORS', "REFERENCE", 'pbi F_DWH_ELENCO_RFI_VENDORS'[REFERENCE])
+				    )
+				)
+
+	annotation PBI_Id = 7e1d4c92a5b84f60b3a8d9c20e5f1a47
+

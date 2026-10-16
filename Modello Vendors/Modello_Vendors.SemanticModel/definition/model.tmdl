@@ -1,0 +1,30 @@
+model Model
+	culture: it-IT
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: it-IT
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["pbi PAR_WP","pbi F_DWH_ELENCO_RFI_VENDORS","pbi F_DWH_REFERENCE_VENDORS","LastRefresh","DIM_Events","DIM_ViewMode"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table 'pbi PAR_WP'
+ref table 'pbi F_DWH_ELENCO_RFI_VENDORS'
+ref table 'pbi F_DWH_REFERENCE_VENDORS'
+ref table Misure
+ref table LastRefresh
+ref table DIM_Events
+ref table DIM_ViewMode
+ref table DIM_Document
+ref table DIM_Weeks
+ref table DIM_Calendar
+ref table DIM_DelayBucket
+ref table DIM_DataBookStatus
+
+ref cultureInfo it-IT
+
